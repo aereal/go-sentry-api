@@ -1,0 +1,24 @@
+---
+
+name: Setup
+on:
+  push:
+    branches:
+      - main
+jobs:
+  setup:
+    if: github.repository != 'aereal/go-lib'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: |
+          cat readme-template.md | ruby -anlpe '$_.gsub!(%<${repo.name}>, ENV[%<REPO_NAME>])' > README.md
+        env:
+          REPO_NAME: ${{ github.repository }}
+      - name: Uninstall setup workflow
+        run: rm .github/workflows/setup.yml
+      - name: Create setup PR
+        uses: peter-evans/create-pull-request@v3
+        with:
+          commit-message: 'docs: update installed repository info'
+          branch: complete-setup
